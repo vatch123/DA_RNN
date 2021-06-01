@@ -1,9 +1,9 @@
 
 import numpy as np
 from itertools import product
-from custom_loss import CustomLoss1, CustomLoss2, CustomLoss3
+from losses.custom_loss import CustomLoss1, CustomLoss2, CustomLoss3
 from data import read_data
-from model import DA_rnn
+from model.darnn import DA_RNN
 
 from tensorflow import summary
 

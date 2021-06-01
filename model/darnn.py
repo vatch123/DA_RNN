@@ -11,8 +11,8 @@ import torch.nn.functional as F
 
 from tensorflow import summary
 
-from encoder import Encoder
-from decoder import Decoder
+from .encoder import Encoder
+from .decoder import Decoder
 
 
 class DA_rnn(nn.Module):
