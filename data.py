@@ -3,10 +3,11 @@ import pandas as pd
 
 
 def read_data(input_path, debug=False, diff=False):
-    """Read data.
+    """
+    This function reads the timeseries data from a file and then normalizes and stationaize the signals. 
 
     Args:
-        input_path (str): directory to nasdaq dataset.
+        input_path (str): directory to dataset.
 
     Returns:
         X (np.ndarray): features.

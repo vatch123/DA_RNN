@@ -16,7 +16,7 @@ from .decoder import Decoder
 
 
 class DA_rnn(nn.Module):
-    """da_rnn."""
+    """DARNN model."""
 
     def __init__(self, X, y, T,
                  encoder_num_hidden,
@@ -27,7 +27,39 @@ class DA_rnn(nn.Module):
                  loss_func,
                  train_size,
                  parallel=False):
-        """da_rnn initialization."""
+        """
+        DA_RNN model initialization.
+        
+        Parameters
+        ----------
+        X: `numpy.ndarray`
+            The input matrix containing all the timeseries data
+        y: `numpy.ndarray`
+            The predicted timeseries for the output
+        T: `int`
+            The number of timesteps to consider attention upon.
+        encoder_num_hidden: `int`
+            The dimension of the encoder's hidden state
+        decoder_num_hidden:: `int`
+            The dimension of the decoder's hidden state
+        batch_size: `int`
+            The batch size
+        learning_rate: `float`
+            The learning rate to be used
+        epochs: `int`
+            The number of epochs to run
+        loss_func: `nn.Module`
+            The loss function to be used
+        train_size: `float`
+            The percentage of samples to be used for training
+        parallel: `bool`
+            If set to `True` the training will be done parallely.
+        
+        Returns
+        ------
+        None
+        """
+
         super(DA_rnn, self).__init__()
         self.encoder_num_hidden = encoder_num_hidden
         self.decoder_num_hidden = decoder_num_hidden
@@ -44,6 +76,7 @@ class DA_rnn(nn.Module):
         self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
         print("==> Use accelerator: ", self.device)
 
+        # Initialize the Encoder and Decoder
         self.Encoder = Encoder(input_size=X.shape[1],
                                encoder_num_hidden=encoder_num_hidden,
                                T=T).to(self.device)
@@ -58,6 +91,7 @@ class DA_rnn(nn.Module):
             self.encoder = nn.DataParallel(self.encoder)
             self.decoder = nn.DataParallel(self.decoder)
 
+        # Declare the opimizers
         self.encoder_optimizer = optim.Adam(params=filter(lambda p: p.requires_grad,
                                                           self.Encoder.parameters()),
                                             lr=self.learning_rate)
@@ -70,8 +104,17 @@ class DA_rnn(nn.Module):
         # self.y = self.y - np.mean(self.y[:self.train_timesteps])
         self.input_size = self.X.shape[1]
 
+
     def train(self, train_summary_writer):
-        """training process."""
+        """
+        The training process.
+
+        Parameters
+        ----------
+        train_summary_writer
+            Tensorboard summary writer
+        """
+
         iter_per_epoch = int(np.ceil(self.train_timesteps * 1. / self.batch_size))
         self.iter_losses = np.zeros(self.epochs * iter_per_epoch)
         self.epoch_losses = np.zeros(self.epochs)
@@ -186,14 +229,22 @@ class DA_rnn(nn.Module):
 
     def train_forward(self, X, y_prev, y_gt):
         """
-        Forward pass.
+        Forward pass through the encoder decoder network.
 
-        Args:
-            X:
-            y_prev:
-            y_gt: Ground truth label
-
+        Parameters
+        ----------
+        X: `numpy.ndarray`
+            The input array
+        y_prev: `numpy.ndarray`
+            The previous predicted value
+        y_gt: `numpy.ndarray`
+            Ground truth label
+        
+        Returns
+        -------
+            The loss incurred at the current step
         """
+
         # zero gradients
         self.encoder_optimizer.zero_grad()
         self.decoder_optimizer.zero_grad()
@@ -217,7 +268,18 @@ class DA_rnn(nn.Module):
 
 
     def test(self, on_train=False):
-        """test."""
+        """
+        The test function
+
+        Parameters
+        ----------
+        on_train: `bool`
+            Whether to test on the training data or not
+        
+        Returns
+        -------
+            The predicted value
+        """
 
         if on_train:
             y_pred = np.zeros(self.train_timesteps - self.T + 1)

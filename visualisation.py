@@ -7,11 +7,15 @@ import pandas as pd
 
 
 def data_vis():
+    """
+    Function to visualize the various time series data in our dataset.
+    """
     dataroot = 'solar_data.txt'
     debug = False   
     diff = False
     X, y = read_data(dataroot, debug, diff)
 
+    # First plot the original timeseries
     fig = plt.figure(figsize=(40,40))
 
     fig.add_subplot(3,3,1)
@@ -50,6 +54,8 @@ def data_vis():
     # plt.show()
 
     ##########################################################################################
+    # Plotting the Fourier Transform of the signals
+
     freq = np.fft.fftfreq(len(y), 1*60*60)
 
     fig = plt.figure(figsize=(40,40))

@@ -6,10 +6,27 @@ import torch.nn.functional as F
 from torch.autograd import Variable
 
 class Decoder(nn.Module):
-    """decoder in DA_RNN."""
+    """Decoder in DA_RNN."""
+
 
     def __init__(self, T, decoder_num_hidden, encoder_num_hidden):
-        """Initialize a decoder in DA_RNN."""
+        """
+        Initialize an decoder in DA_RNN.
+        
+        Parameters
+        ----------
+        T: `int`
+            The number of timesteps to consider attention upon.
+        decoder_num_hidden:: `int`
+            The dimension of the decoder's hidden state
+        encoder_num_hidden: `int`
+            The dimension of the encoder's hidden state
+        
+        Returns
+        ------
+        None
+        """
+
         super(Decoder, self).__init__()
         self.decoder_num_hidden = decoder_num_hidden
         self.encoder_num_hidden = encoder_num_hidden
@@ -29,8 +46,24 @@ class Decoder(nn.Module):
 
         self.fc.weight.data.normal_()
 
+
     def forward(self, X_encoded, y_prev):
-        """forward."""
+        """
+        The forward propagation for the decoder.
+
+        Parameters
+        ----------
+        X_encoded: `numpy.ndarray`
+            The input data after encoding.
+        y_prev: `numpy.ndarray`
+            The output in the previous timestep
+        
+        Returns
+        -------
+        y_pred: `numpy.ndarray`
+            The predicted output for the current timestep
+        """
+
         d_n = self._init_states(X_encoded)
         c_n = self._init_states(X_encoded)
 
@@ -66,14 +99,19 @@ class Decoder(nn.Module):
         return y_pred
 
     def _init_states(self, X):
-        """Initialize all 0 hidden states and cell states for encoder.
-
-        Args:
-            X
-        Returns:
-            initial_hidden_states
-
         """
+        Initialize all 0 hidden states and cell states for encoder.
+
+        Parameters
+        ----------
+        X: `numpy.ndarray`
+            The input array
+
+        Returns
+        -------
+            initial_hidden_states
+        """
+
         # hidden state and cell state [num_layers*num_directions, batch_size, hidden_size]
         # https://pytorch.org/docs/master/nn.html?#lstm
         return Variable(X.data.new(1, X.size(0), self.decoder_num_hidden).zero_())

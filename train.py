@@ -9,9 +9,21 @@ from tensorflow import summary
 
 
 def main(debug=False):
+    """
+    This is the main function which runs the entire pipeline of loading the data, defining the number of
+    training runs on the network, along with storing the model performance while training and testing for
+    easier access through tensorboard.
+
+    Parameters
+    ----------
+    debug: `bool`
+        If true the training is done in debug mode for a very small number of epochs.
+    """
 
     dataroot = 'solar_data.txt'
     
+    # Define the list of hyperparameteres to run the training loops on and then the best possible
+    # set of hyperparameters can be chosen
     parameters = dict(  batchsize = [64],
                         nhidden_encoder = [64],
                         nhidden_decoder = [64],
@@ -41,7 +53,7 @@ def main(debug=False):
         
         # Initialize model
         print("==> Initialize DA-RNN model ...")
-        model = DA_rnn(
+        model = DA_RNN(
             X,
             y,
             ntimestep,
@@ -54,13 +66,14 @@ def main(debug=False):
             train_size,
         )
 
-
+        # Name the run based on hyperparamter values
         run_name = f'batch_size={batchsize} lr={lr} epochs = {epochs} nhidden_encoder = {nhidden_encoder} nhidden_decoder = {nhidden_decoder}'
         run_name += f' ntimestep = {ntimestep} loss_func = {loss_func} diff = {diff}'
 
         if debug:
             run_name += ' Test'
 
+        # Store the logs
         train_log_dir = 'logs/train/' + run_name
         train_summary_writer = summary.create_file_writer(train_log_dir)
 
@@ -99,6 +112,8 @@ def main(debug=False):
         # plt.savefig("3.png")
         # plt.close(fig3)
         # print('Finished Training')
+
+    # Display the best results
     run_stats.sort()
     print("Best runs: ")
     for run in run_stats:

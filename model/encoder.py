@@ -7,13 +7,32 @@ from torch.autograd import Variable
 
 
 class Encoder(nn.Module):
-    """encoder in DA_RNN."""
+    """Encoder in DA_RNN."""
+
 
     def __init__(self, T,
                  input_size,
                  encoder_num_hidden,
                  parallel=False):
-        """Initialize an encoder in DA_RNN."""
+        """
+        Initialize an encoder in DA_RNN.
+        
+        Parameters
+        ----------
+        T: `int`
+            The number of timesteps to consider attention upon.
+        input_size:: `int`
+            The dimension of the input
+        encoder_num_hidden: `int`
+            The dimension of the encoder's hidden state
+        parallel: `bool`
+            If set to `True` the training will be done parallely.
+        
+        Returns
+        ------
+        None
+        """
+
         super(Encoder, self).__init__()
         self.encoder_num_hidden = encoder_num_hidden
         self.input_size = input_size
@@ -34,13 +53,24 @@ class Encoder(nn.Module):
             out_features=1
         )
 
+
     def forward(self, X):
-        """forward.
-
-        Args:
-            X: input data
-
         """
+        The forward propagation for the encoder.
+
+        Parameters
+        ----------
+        X: `numpy.ndarray`
+            input data
+        
+        Returns
+        -------
+        X_tilde: `numpy.ndarray`
+            The input sequence of after forward pass thus after the application of attention
+        X_encoded: `numpy.ndarray`
+            The encoded sequence for the given input
+        """
+
         X_tilde = Variable(X.data.new(
             X.size(0), self.T - 1, self.input_size).zero_())
         X_encoded = Variable(X.data.new(
@@ -85,14 +115,20 @@ class Encoder(nn.Module):
 
         return X_tilde, X_encoded
 
+
     def _init_states(self, X):
-        """Initialize all 0 hidden states and cell states for encoder.
+        """
+        Initialize all 0 hidden states and cell states for encoder.
 
-        Args:
-            X
+        Parameters
+        ----------
+        X: `numpy.ndarray`
+            The input array
 
-        Returns:
+        Returns
+        -------
             initial_hidden_states
         """
+
         # https://pytorch.org/docs/master/nn.html?#lstm
         return Variable(X.data.new(1, X.size(0), self.encoder_num_hidden).zero_())
